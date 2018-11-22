@@ -1,5 +1,6 @@
-*.pdf
+scripts/secret.py
 
+*.pdf
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
