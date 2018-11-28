@@ -14,16 +14,14 @@ def get_api(keynum):
                   config["default"]["accessToken"],
                   config["default"]["accessTokenSecret"])
 
-
-
 if __name__ == '__main__':
-    df = pd.read_csv("../data/results.csv", encoding="utf-8")
+    df = pd.read_csv("../data/sample.csv", encoding="utf-8")
     apis = [get_api(i) for i in range(2)]
     try:
-        for i, row in df.iloc[[162 ,1082,1318,1532,1542,1600,1778]].iterrows():
+        for i, row in df.iterrows():
             api = apis[i % len(apis)]
             uid = int(row["id"])
-            if type(row["followers"]) is str:
+            if "followers" in row and type(row["followers"]) is str:
                 print("Skipping", uid)
                 continue
             print(i, "Getting followers/following for", uid)
@@ -39,5 +37,4 @@ if __name__ == '__main__':
             df.loc[i,"following"] = ",".join(str(f) for f in following["ids"])
     finally:
         # print(df)
-        df.to_csv("../data/results.csv", index=False)
-        # print(dir(api))
+        df.to_csv("../data/sample.csv", index=False)
