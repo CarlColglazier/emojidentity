@@ -25,11 +25,17 @@ all_ids = set(chain.from_iterable([x.split(',') for x in list(sample["followers"
 
 id_list = list(all_ids)
 
-users = open('second_users.txt', 'a') 
+users = open('second_users.txt', 'a')
+
+columns = [
+    "id", "name", "screen_name", "description", "followers_count",
+    "friends_count", "favorites_count", "listed_count",
+    "created_at"
+]
 for i in range(0, math.ceil(len(id_list) / 100)):
     ids = id_list[i*100:i*100 + 100]
     response = client.lookup_user(user_id=ids)
-    users.writelines([str(x)+'\n' for x in response])
+    users.writelines([str({key:value for key, value in x.items() if key in columns})+'\n' for x in response])
     print(i, client.get_lastfunction_header('x-rate-limit-remaining'))
     if int(client.get_lastfunction_header('x-rate-limit-remaining')) < 10:
         time.sleep(int(client.get_lastfunction_header('x-rate-limit-reset')) - int(time.time()) + 1)
