@@ -32,13 +32,20 @@ columns = [
     "friends_count", "favorites_count", "listed_count",
     "created_at"
 ]
-for i in range(0, math.ceil(len(id_list) / 100)):
-    ids = id_list[i*100:i*100 + 100]
-    response = client.lookup_user(user_id=ids)
-    users.writelines([str({key:value for key, value in x.items() if key in columns})+'\n' for x in response])
-    print(i, client.get_lastfunction_header('x-rate-limit-remaining'))
-    if int(client.get_lastfunction_header('x-rate-limit-remaining')) < 10:
-        time.sleep(int(client.get_lastfunction_header('x-rate-limit-reset')) - int(time.time()) + 1)
-        print("sleeping")
+for i in range(4262, math.ceil(len(id_list) / 100)):
+    try:
+        ids = id_list[i*100:i*100 + 100]
+        response = client.lookup_user(user_id=ids)
+        users.writelines([str({key:value for key, value in x.items() if key in columns})+'\n' for x in response])
+        print(i, client.get_lastfunction_header('x-rate-limit-remaining'))
+        time.sleep(0.75)
+        if int(client.get_lastfunction_header('x-rate-limit-remaining')) < 10:
+            t = int(client.get_lastfunction_header('x-rate-limit-reset')) - int(time.time()) + 1
+            if t > 0:
+                time.sleep(t)
+                print("sleeping")
+    except:
+        print("Error", i, client.get_lastfunction_header('x-rate-limit-remaining'))
+        time.sleep(10)
 
     
