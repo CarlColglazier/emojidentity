@@ -1,8 +1,11 @@
 scripts/secret.py
 emoji.tex
+xelatex-emoji/
 
 emoji.pdf
 original/*
+__pycache__/
+
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

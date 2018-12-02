@@ -7,6 +7,7 @@
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
 #+options: toc:nil
 #+LaTeX_HEADER: \usepackage{hyperref}
+#+latex_header: \usepackage{coloremoji}
 # #+LaTeX_HEADER: \usepackage[margin=1in]{geometry}
 #+LaTeX_HEADER: \usepackage[backend=bibtex,sorting=none]{biblatex}
 #+LaTeX_HEADER: \addbibresource{main.bib}  %% point at your bib file
@@ -29,7 +30,7 @@ as social phenomenon, we introduce methods for measuring...
 ** Research Questions
 
 
-+ R1: Do users with emojis connect more often with similar emoji users? (computational)
++ R1: Do users with emojis connect more often with other emoji users? (computational)
 + R2: Do people tend to form cliques with similar emoji users? What does the overall network look like? (social)
 + R3: Are some emoji more likely to appear in cliques than others? (computational)
 
@@ -60,7 +61,8 @@ users = pd.read_csv("../data/users.csv", engine='c', lineterminator='\n')
 original_sample = pd.read_csv("../data/sample.csv")
 original_control = pd.read_csv("../data/control.csv")
 updated = pd.read_csv("../data/updatedsamplecontrol.csv", lineterminator='\n')
-sec = pd.read_csv("../data/second.csv", lineterminator='\n')
+meta = pd.read_csv("../data/meta.csv", lineterminator='\n')
+meta["nemoji"] = meta["nemoji"].map(eval)
 def get_emoji(text):
     s = set()
     t = text
@@ -68,6 +70,8 @@ def get_emoji(text):
         if e in t:
             s.add(e)
             t = t.replace(e, '')
+        if len(t) == 0:
+            break
     return s
 
 em = list(emoji_list())
@@ -283,16 +287,113 @@ plt.savefig("../images/%s" % f)
 [[file:images/vio_friends.pdf]]
 
 ** Network Analysis
-#+BEGIN_SRC python :session
-emoji_df = pd.DataFrame(0, index=emoji_list(), columns=emoji_list())
+#+BEGIN_SRC python :session :exports results :results output table
+sample_follower_ids = set(chain.from_iterable([x.split(',') for x in list(sample.merge(original_sample, on="id", how='left')["followers"]) if type(x) == str]))
+control_follower_ids = set(chain.from_iterable([x.split(',') for x in list(control.merge(original_control, on="id", how='left')["followers"]) if type(x) == str]))
+meta["sample_follower"] = meta["id"].isin(sample_follower_ids)
+meta["control_follower"] = meta["id"].isin(control_follower_ids)
+c = Counter()
+csample = Counter()
+ccontrol = Counter()
+for item in meta["nemoji"]:
+    for e in item:
+        c[e] += 1
+
+for item in meta[meta["sample_follower"]]["nemoji"]:
+    for e in item:
+        csample[e] += 1
+
+for item in meta[meta["control_follower"]]["nemoji"]:
+    for e in item:
+        ccontrol[e] += 1
+
+most_common = [x[0] for x in c.most_common(10)]
+print([["Emoji", "Total Count", "Sample Followers", "Control Followers"]] + [None] + [[x, c.get(x), csample.get(x), ccontrol.get(x)] for x in most_common])
 #+END_SRC
 
 #+RESULTS:
+| Emoji | Total Count | Sample Followers | Control Followers |
+|-------+-------------+------------------+-------------------|
+| ✨    |       26895 |             7743 |              2210 |
+| 🇺🇸    |       24072 |            15350 |              8901 |
+| 👑    |       12985 |             3824 |              1163 |
+| ❌    |       11830 |             8596 |              4874 |
+| 🌹    |       11396 |             3897 |              1529 |
+| 🌊    |       10740 |             6892 |              4896 |
+| ❤️     |        9584 |             3444 |              1422 |
+| 🌻    |        7643 |             2250 |               845 |
+| 🎄    |        7417 |             1955 |               923 |
+| 💜    |        7371 |             2189 |               484 |
+
+#+BEGIN_SRC python :session :exports results :results output table
+sample_following_ids = set(chain.from_iterable([x.split(',') for x in list(sample.merge(original_sample, on="id", how='left')["following"]) if type(x) == str]))
+control_following_ids = set(chain.from_iterable([x.split(',') for x in list(control.merge(original_control, on="id", how='left')["following"]) if type(x) == str]))
+meta["sample_following"] = meta["id"].isin(control_following_ids)
+meta["control_following"] = meta["id"].isin(control_following_ids)
+c = Counter()
+csample = Counter()
+ccontrol = Counter()
+for item in meta["nemoji"]:
+    for e in item:
+        c[e] += 1
+
+for item in meta[meta["sample_following"]]["nemoji"]:
+    for e in item:
+        csample[e] += 1
+
+for item in meta[meta["control_following"]]["nemoji"]:
+    for e in item:
+        ccontrol[e] += 1
+
+most_common = [x[0] for x in c.most_common(10)]
+print([["Emoji", "Total Count", "Sample Following", "Control Following"]] + [None] + [[x, c.get(x), csample.get(x), ccontrol.get(x)] for x in most_common])
+#+END_SRC
+
+#+RESULTS:
+| Emoji | Total Count | Sample Friends | Control Friends |
+|-------+-------------+----------------+-----------------|
+| ✨    |       26895 |           2386 |            2386 |
+| 🇺🇸    |       24072 |           8883 |            8883 |
+| 👑    |       12985 |           1126 |            1126 |
+| ❌    |       11830 |           4784 |            4784 |
+| 🌹    |       11396 |           1582 |            1582 |
+| 🌊    |       10740 |           4876 |            4876 |
+| ❤️     |        9584 |           1268 |            1268 |
+| 🌻    |        7643 |            892 |             892 |
+| 🎄    |        7417 |           1191 |            1191 |
+| 💜    |        7371 |            494 |             494 |
+
+#+BEGIN_SRC python :session :exports results :results values table
+emoji_df = pd.DataFrame(0, index=emoji_list(), columns=emoji_list())
+s = original_sample[original_sample["id"].isin(sample["id"])]
+s["name_emoji"] = [get_emoji(str(x)) for x in s["name"]]
+c = original_control[original_control["id"].isin(control["id"])]
+for _, user in s[s.index < 10].iterrows():
+    followers = [int(x) for x in user["followers"].split(",")]
+    count = Counter()
+    for emoji in meta[meta["id"].isin(followers)]["nemoji"]:
+        for i, e in emoji:
+            count[e] += 1
+    for e in user["name_emoji"]:
+        for em, value in count:
+            print(e, em, value)
+            emoji_df[e][em] += value
+
+emoji_df.sum().sum()
+#+END_SRC
+
+#+RESULTS:
+| 2 |
 
 * Discussion
+Users in our sample with an emoji in their display names follow more
+users, have more followers, and are included in more lists.
 ** Limitations
 The small sample size (N = 1000) limits the ability to compare
 attributes between users with different kinds of emoji.
+** Future Work
+We were unable to answer R3 given the sample size. To do so
+in the future.
 #+BEGIN_EXPORT latex
 \bibliographystyle{acm}
 \printbibliography
