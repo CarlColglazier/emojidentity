@@ -1,4 +1,5 @@
-#+TITLE: Emoji and Identity
+# -*- org-export-babel-evaluate: nil -*-
+#+TITLE: Observations of Emoji and Group Identity on Twitter
 #+Author: Carl Colglazier, Zackary Allen
 #+LaTeX_CLASS_OPTIONS: [letterpaper,11pt, twocolumn]
 #+options: toc:nil
@@ -15,7 +16,7 @@ Abstract.
 
 * Background
 
-#+INCLUDE: background.txt
+#+INCLUDE: background.tex
 
 * Method
 
@@ -97,7 +98,6 @@ D’Agostino and Pearson’s test for departure from normalcy.
 
 #+NAME: normaltest
 #+CAPTION: D’Agostino and Pearson’s test on variables.
-#+ATTR_LATEX: :float multicolumn :placement [ht]
 #+RESULTS:
 | Group                   | Statistic | p-value |
 |-------------------------+-----------+---------|
@@ -115,17 +115,39 @@ that a randomly selected value from one sample will be less than or
 greater than a randomly selected value from a second sample.
 
 #+BEGIN_SRC python :session :exports results :results values table
-statistic, pvalue = stats.mannwhitneyu(control["listed_count"], sample["listed_count"], equal_var=False)
-series = pd.DataFrame({"Statistic": [statistic], "p-value": [pvalue]})
-[list(series)] + [None] + series.round(4).values.tolist()
+  t = {"sample": sample, "control": control}
+  counts = ["listed_count", "followers_count", "friends_count"]
+  results = []
+  for count in counts:
+    statistic, p = stats.mannwhitneyu(control[count], sample[count])
+    print(p)
+    results.append({
+      "Variable": count,
+      "statistic": statistic,
+      "p-value": p
+    })
+  
+  series = pd.DataFrame(results)
+  [list(series)] + [None] + series.round(4).values.tolist()
 #+END_SRC
 
+#+NAME: tbl:mann
+#+CAPTION: Mann-Whitney rank tests.
 #+RESULTS:
-| Statistic | p-value |
-|-----------+---------|
-| 1141.8983 |     0.0 |
+| Variable        | p-value | statistic |
+|-----------------+---------+-----------|
+| listed_count    |  0.0423 |  478001.5 |
+| followers_count |     0.0 |  373393.5 |
+| friends_count   |     0.0 |  397093.0 |
 
-#+BEGIN_SRC python :session :var f="cum_listed.pdf" :results file graphics :exports result
+[[tbl:mann]] suggests statistical significance between the sample
+and control groups for the number of lists in which users appear,
+the number of accounts users follow, and the number of followers
+for each user.
+
+*** Old data. Not for export.                                      :noexport:
+
+#+BEGIN_SRC python :session :var f="cum_listed.pdf" :results file graphics :exports none :eval no
 plt.style.use('ggplot')
 plt.clf()
 bins = np.linspace(0, 250, 25)
@@ -140,7 +162,7 @@ plt.savefig("../images/%s" % f)
 #+RESULTS:
 [[file:images/cum_listed.pdf]]
 
-#+BEGIN_SRC python :session :var f="vio_listed.pdf" :results file graphics :exports result
+#+BEGIN_SRC python :session :var f="vio_listed.pdf" :results file graphics :exports none :eval no
 sample["sample"] = True
 control["sample"] = False
 all_sampled = sample.append(control)
@@ -155,18 +177,19 @@ plt.savefig("../images/%s" % f)
 #+RESULTS:
 [[file:images/vio_listed.pdf]]
 
-#+BEGIN_SRC python :session :exports results :results values table
-statistic, pvalue = stats.mannwhitneyu(control["followers_count"], sample["followers_count"], equal_var=False)
+#+BEGIN_SRC python :session :exports none :results values table :eval no
+statistic, pvalue = stats.mannwhitneyu(control["followers_count"], sample["followers_count"])
 series = pd.DataFrame({"Statistic": [statistic], "p-value": [pvalue]})
 [list(series)] + [None] + series.round(4).values.tolist()
 #+END_SRC
 
+#+CAPTION: Mann-Whitney rank test for the "followers count" variable.
 #+RESULTS:
 | Statistic | p-value |
 |-----------+---------|
-| 1141.8983 |     0.0 |
+|  373393.5 |     0.0 |
 
-#+BEGIN_SRC python :session :var f="cum_followers.pdf" :results file graphics :exports results
+#+BEGIN_SRC python :session :var f="cum_followers.pdf" :results file graphics :exports none :eval no
 plt.style.use('ggplot')
 plt.clf()
 bins = np.linspace(0, 50_000, 25)
@@ -181,7 +204,7 @@ plt.savefig("../images/%s" % f)
 #+RESULTS:
 [[file:images/cum_followers.pdf]]
 
-#+BEGIN_SRC python :session :var f="vio_followers.pdf" :results file graphics :exports result
+#+BEGIN_SRC python :session :var f="vio_followers.pdf" :results file graphics :exports none :eval no
 plt.clf()
 ax = sns.violinplot(y="followers_count", x="sample", data=all_sampled)
 plt.yscale('log', nonposy='clip')
@@ -193,21 +216,20 @@ plt.savefig("../images/%s" % f)
 #+RESULTS:
 [[file:images/vio_followers.pdf]]
 
-
-
-#+BEGIN_SRC python :session :exports results :results values table
-statistic, pvalue = stats.mannwhitneyu(control["friends_count"], sample["friends_count"], equal_var=False)
+#+BEGIN_SRC python :session :exports none :results values table :eval no
+statistic, pvalue = stats.mannwhitneyu(control["friends_count"], sample["friends_count"])
 series = pd.DataFrame({"Statistic": [statistic], "p-value": [pvalue]})
 [list(series)] + [None] + series.round(4).values.tolist()
 #+END_SRC
 
+#+CAPTION: Mann-Whitney rank test for the "friends count" (following) variable.
 #+RESULTS:
 | Statistic | p-value |
 |-----------+---------|
-| 1141.8983 |     0.0 |
+|  397093.0 |     0.0 |
 
 
-#+BEGIN_SRC python :session :var f="cum_friends.pdf" :results file graphics :exports results
+#+BEGIN_SRC python :session :var f="cum_friends.pdf" :results file graphics :exports none :eval no
 plt.style.use('ggplot')
 plt.clf()
 bins = np.linspace(0, 50_000, 25)
@@ -222,7 +244,7 @@ plt.savefig("../images/%s" % f)
 #+RESULTS:
 [[file:images/cum_friends.pdf]]
 
-#+BEGIN_SRC python :session :var f="vio_friends.pdf" :results file graphics :exports result
+#+BEGIN_SRC python :session :var f="vio_friends.pdf" :results file graphics :exports none :eval no
 plt.clf()
 ax = sns.violinplot(y="friends_count", x="sample", data=all_sampled)
 plt.yscale('log', nonposy='clip')
@@ -235,7 +257,16 @@ plt.savefig("../images/%s" % f)
 [[file:images/vio_friends.pdf]]
 
 ** Network Analysis
+#+BEGIN_SRC python :session
+emoji_df = pd.DataFrame(0, index=emoji_list(), columns=emoji_list())
+#+END_SRC
+
+#+RESULTS:
+
 * Discussion
+
+** Limitations
+
 
 #+BEGIN_EXPORT latex
 \printbibliography
