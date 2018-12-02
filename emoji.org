@@ -1,17 +1,21 @@
-# -*- org-export-babel-evaluate: nil -*-
-#+TITLE: Observations of Emoji and Group Identity on Twitter
+# -*- mode: org; org-export-babel-evaluate: nil -*-
+#+TITLE: Emoji and Group Identity on Twitter
 #+Author: Carl Colglazier, Zackary Allen
-#+LaTeX_CLASS_OPTIONS: [letterpaper,11pt, twocolumn]
+#+LaTeX_CLASS: acmart
+#+LATEX_CLASS_OPTIONS: [format=manuscript, review=false, screen=true, authorversion=true, nonacm=true, authordraft=true]
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
 #+options: toc:nil
 #+LaTeX_HEADER: \usepackage{hyperref}
-#+LaTeX_HEADER: \usepackage[margin=1in]{geometry}
+# #+LaTeX_HEADER: \usepackage[margin=1in]{geometry}
 #+LaTeX_HEADER: \usepackage[backend=bibtex,sorting=none]{biblatex}
 #+LaTeX_HEADER: \addbibresource{main.bib}  %% point at your bib file
-#+LaTeX_HEADER: \usepackage{hyperref}
 #+PANDOC_OPTIONS: bibliography:main.bib
 
 #+LaTeX: \begin{abstract}
-Abstract.
+We propose a measure for group identity on Twitter using emoji
+displayed by users in their names. Viewing the use of emoji
+as social phenomenon, we introduce methods for measuring...
 #+LaTeX: \end{abstract}
 
 * Background
@@ -56,6 +60,7 @@ users = pd.read_csv("../data/users.csv", engine='c', lineterminator='\n')
 original_sample = pd.read_csv("../data/sample.csv")
 original_control = pd.read_csv("../data/control.csv")
 updated = pd.read_csv("../data/updatedsamplecontrol.csv", lineterminator='\n')
+sec = pd.read_csv("../data/second.csv", lineterminator='\n')
 def get_emoji(text):
     s = set()
     t = text
@@ -88,8 +93,8 @@ D’Agostino and Pearson’s test for departure from normalcy.
       print(p)
       results.append({
         "Group": "{} {}".format(key, count),
-        "Statistic": statistic,
-        "p-value": p
+        "statistic": statistic,
+        "p-value": '%.2E' % p
       })
   
   series = pd.DataFrame(results)
@@ -99,16 +104,16 @@ D’Agostino and Pearson’s test for departure from normalcy.
 #+NAME: normaltest
 #+CAPTION: D’Agostino and Pearson’s test on variables.
 #+RESULTS:
-| Group                   | Statistic | p-value |
-|-------------------------+-----------+---------|
-| sample listed_count     | 1355.9307 |     0.0 |
-| sample followers_count  | 1339.5606 |     0.0 |
-| sample friends_count    | 1483.7946 |     0.0 |
-| control listed_count    | 2114.8148 |     0.0 |
-| control followers_count | 1779.9979 |     0.0 |
-| control friends_count   | 1141.8983 |     0.0 |
+| Group                   |   p-value | statistic |
+|-------------------------+-----------+-----------|
+| sample listed_count     | 3.66E-295 | 1355.9307 |
+| sample followers_count  | 1.31E-291 | 1339.5606 |
+| sample friends_count    |  0.00E+00 | 1483.7946 |
+| control listed_count    |  0.00E+00 | 2114.8148 |
+| control followers_count |  0.00E+00 | 1779.9979 |
+| control friends_count   | 1.10E-248 | 1141.8983 |
 
-As [[normaltest]] shows, the null hypothesis that each sample comes from a
+As Table [[normaltest]] shows, the null hypothesis that each sample comes from a
 normal distribution can be rejected. The Mann-Whitney rank test is
 used instead to test the null hypothesis that it is equally likely
 that a randomly selected value from one sample will be less than or
@@ -124,7 +129,7 @@ greater than a randomly selected value from a second sample.
     results.append({
       "Variable": count,
       "statistic": statistic,
-      "p-value": p
+      "p-value": '%.2E' % p
     })
   
   series = pd.DataFrame(results)
@@ -134,16 +139,37 @@ greater than a randomly selected value from a second sample.
 #+NAME: tbl:mann
 #+CAPTION: Mann-Whitney rank tests.
 #+RESULTS:
-| Variable        | p-value | statistic |
-|-----------------+---------+-----------|
-| listed_count    |  0.0423 |  478001.5 |
-| followers_count |     0.0 |  373393.5 |
-| friends_count   |     0.0 |  397093.0 |
+| Variable        |  p-value | statistic |
+|-----------------+----------+-----------|
+| listed_count    | 4.23E-02 |  478001.5 |
+| followers_count | 5.39E-23 |  373393.5 |
+| friends_count   | 7.99E-16 |  397093.0 |
 
-[[tbl:mann]] suggests statistical significance between the sample
-and control groups for the number of lists in which users appear,
-the number of accounts users follow, and the number of followers
-for each user.
+Table [[tbl:mann]] suggests a statistically significant different in the
+distributions between the sample and control groups for the number of
+lists in which users appear, the number of accounts users follow, and
+the number of followers for each user.
+
+#+BEGIN_SRC python :session :var f="vios.pdf" :results file graphics :exports results
+plt.clf()
+all_sampled["listed_count_rank"] = all_sampled["listed_count"].rank()
+all_sampled["followers_count_rank"] = all_sampled["followers_count"].rank()
+all_sampled["friends_count_rank"] = all_sampled["friends_count"].rank()
+objs = ["listed_count_rank", "followers_count_rank", "friends_count_rank"]
+fig, axes = plt.subplots(3, 1, figsize=(6, 8), sharex=True)
+sns.violinplot(y="listed_count_rank", x="sample", data=all_sampled, ax=axes[0])
+sns.violinplot(y="followers_count_rank", x="sample", data=all_sampled, ax=axes[1])
+sns.violinplot(y="friends_count_rank", x="sample", data=all_sampled, ax=axes[2])
+plt.savefig("../images/%s" % f)
+"images/%s" % f
+#+END_SRC
+
+#+NAME: fig:vios
+#+CAPTION: Violin plot.
+#+RESULTS:
+[[file:images/vios.pdf]]
+
+Figure [[fig:vios]] shows the distribution of the ranks for the variables.
 
 *** Old data. Not for export.                                      :noexport:
 
@@ -264,11 +290,11 @@ emoji_df = pd.DataFrame(0, index=emoji_list(), columns=emoji_list())
 #+RESULTS:
 
 * Discussion
-
 ** Limitations
-
-
+The small sample size (N = 1000) limits the ability to compare
+attributes between users with different kinds of emoji.
 #+BEGIN_EXPORT latex
+\bibliographystyle{acm}
 \printbibliography
 #+END_EXPORT
 
