@@ -1,0 +1,243 @@
+#+TITLE: Emoji and Identity
+#+Author: Carl Colglazier, Zackary Allen
+#+LaTeX_CLASS_OPTIONS: [letterpaper,11pt, twocolumn]
+#+options: toc:nil
+#+LaTeX_HEADER: \usepackage{hyperref}
+#+LaTeX_HEADER: \usepackage[margin=1in]{geometry}
+#+LaTeX_HEADER: \usepackage[backend=bibtex,sorting=none]{biblatex}
+#+LaTeX_HEADER: \addbibresource{main.bib}  %% point at your bib file
+#+LaTeX_HEADER: \usepackage{hyperref}
+#+PANDOC_OPTIONS: bibliography:main.bib
+
+#+LaTeX: \begin{abstract}
+Abstract.
+#+LaTeX: \end{abstract}
+
+* Background
+
+#+INCLUDE: background.txt
+
+* Method
+
+#+INCLUDE: method.tex
+
+** Research Questions
+
+
++ R1: Do users with emojis connect more often with similar emoji users? (computational)
++ R2: Do people tend to form cliques with similar emoji users? What does the overall network look like? (social)
++ R3: Are some emoji more likely to appear in cliques than others? (computational)
+
+** Challenges
++  Data scraping and how much data is enough (10k users?) sparsity?
+  (computational)
++ Connection representation (computational)
++ Understanding Twitter cliques (social)
++ R3 may change if there aren’t enough cliques
+
+* Results
+** Sample Analysis
+#+BEGIN_SRC python :dir ./scripts :session :exports none :results silent
+import numpy as np
+import pandas as pd
+from scipy import stats
+from scrape_emoji import emoji_list
+from itertools import chain
+import math
+import statsmodels
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from collections import Counter
+from matplotlib import pyplot as plt
+import numpy as np
+import seaborn as sns
+users = pd.read_csv("../data/users.csv", engine='c', lineterminator='\n')
+original_sample = pd.read_csv("../data/sample.csv")
+original_control = pd.read_csv("../data/control.csv")
+updated = pd.read_csv("../data/updatedsamplecontrol.csv", lineterminator='\n')
+def get_emoji(text):
+    s = set()
+    t = text
+    for e in em:
+        if e in t:
+            s.add(e)
+            t = t.replace(e, '')
+    return s
+
+em = list(emoji_list())
+em.sort(key=len, reverse=True)
+updated["name_emoji"] = [get_emoji(str(x)) for x in updated["name"]]
+sample = updated[(updated["name_emoji"].str.len() > 0) & (updated.index.isin(original_sample.index))]
+sample = sample.sample(1000, random_state=31415926)
+control = updated[(updated["name_emoji"].str.len() == 0) & (updated.index.isin(original_control.index))]
+control = control.sample(1000, random_state=31415926)
+#+END_SRC
+
+Before any analysis, we must first determine if parametric statistics
+apply. We can test for the normalcy of the distribution using
+D’Agostino and Pearson’s test for departure from normalcy.
+
+#+BEGIN_SRC python :session :exports results :results values table
+  t = {"sample": sample, "control": control}
+  counts = ["listed_count", "followers_count", "friends_count"]
+  results = []
+  for key in t.keys():
+    for count in counts:
+      statistic, p = stats.normaltest(t[key][count])
+      print(p)
+      results.append({
+        "Group": "{} {}".format(key, count),
+        "Statistic": statistic,
+        "p-value": p
+      })
+  
+  series = pd.DataFrame(results)
+  [list(series)] + [None] + series.round(4).values.tolist()
+#+END_SRC
+
+#+NAME: normaltest
+#+CAPTION: D’Agostino and Pearson’s test on variables.
+#+ATTR_LATEX: :float multicolumn :placement [ht]
+#+RESULTS:
+| Group                   | Statistic | p-value |
+|-------------------------+-----------+---------|
+| sample listed_count     | 1355.9307 |     0.0 |
+| sample followers_count  | 1339.5606 |     0.0 |
+| sample friends_count    | 1483.7946 |     0.0 |
+| control listed_count    | 2114.8148 |     0.0 |
+| control followers_count | 1779.9979 |     0.0 |
+| control friends_count   | 1141.8983 |     0.0 |
+
+As [[normaltest]] shows, the null hypothesis that each sample comes from a
+normal distribution can be rejected. The Mann-Whitney rank test is
+used instead to test the null hypothesis that it is equally likely
+that a randomly selected value from one sample will be less than or
+greater than a randomly selected value from a second sample.
+
+#+BEGIN_SRC python :session :exports results :results values table
+statistic, pvalue = stats.mannwhitneyu(control["listed_count"], sample["listed_count"], equal_var=False)
+series = pd.DataFrame({"Statistic": [statistic], "p-value": [pvalue]})
+[list(series)] + [None] + series.round(4).values.tolist()
+#+END_SRC
+
+#+RESULTS:
+| Statistic | p-value |
+|-----------+---------|
+| 1141.8983 |     0.0 |
+
+#+BEGIN_SRC python :session :var f="cum_listed.pdf" :results file graphics :exports result
+plt.style.use('ggplot')
+plt.clf()
+bins = np.linspace(0, 250, 25)
+plt.hist([control["listed_count"], sample["listed_count"]], bins, label=['control', 'sample'], cumulative=True)
+plt.legend(loc='upper right')
+plt.yscale('log', nonposy='clip')
+plt.savefig("../images/%s" % f)
+"images/%s" % f
+#+END_SRC
+
+#+ATTR_LATEX: :float multicolumn
+#+RESULTS:
+[[file:images/cum_listed.pdf]]
+
+#+BEGIN_SRC python :session :var f="vio_listed.pdf" :results file graphics :exports result
+sample["sample"] = True
+control["sample"] = False
+all_sampled = sample.append(control)
+plt.clf()
+ax = sns.violinplot(y="listed_count", x="sample", data=all_sampled)
+plt.yscale('log', nonposy='clip')
+plt.savefig("../images/%s" % f)
+"images/%s" % f
+#+END_SRC
+
+#+ATTR_LATEX: :float multicolumn
+#+RESULTS:
+[[file:images/vio_listed.pdf]]
+
+#+BEGIN_SRC python :session :exports results :results values table
+statistic, pvalue = stats.mannwhitneyu(control["followers_count"], sample["followers_count"], equal_var=False)
+series = pd.DataFrame({"Statistic": [statistic], "p-value": [pvalue]})
+[list(series)] + [None] + series.round(4).values.tolist()
+#+END_SRC
+
+#+RESULTS:
+| Statistic | p-value |
+|-----------+---------|
+| 1141.8983 |     0.0 |
+
+#+BEGIN_SRC python :session :var f="cum_followers.pdf" :results file graphics :exports results
+plt.style.use('ggplot')
+plt.clf()
+bins = np.linspace(0, 50_000, 25)
+plt.hist([control["followers_count"], sample["followers_count"]], bins, label=['control', 'sample'], cumulative=True)
+plt.legend(loc='upper left')
+plt.yscale('log', nonposy='clip')
+plt.savefig("../images/%s" % f)
+"images/%s" % f
+#+END_SRC
+
+#+ATTR_LATEX: :float multicolumn
+#+RESULTS:
+[[file:images/cum_followers.pdf]]
+
+#+BEGIN_SRC python :session :var f="vio_followers.pdf" :results file graphics :exports result
+plt.clf()
+ax = sns.violinplot(y="followers_count", x="sample", data=all_sampled)
+plt.yscale('log', nonposy='clip')
+plt.savefig("../images/%s" % f)
+"images/%s" % f
+#+END_SRC
+
+#+ATTR_LATEX: :float multicolumn
+#+RESULTS:
+[[file:images/vio_followers.pdf]]
+
+
+
+#+BEGIN_SRC python :session :exports results :results values table
+statistic, pvalue = stats.mannwhitneyu(control["friends_count"], sample["friends_count"], equal_var=False)
+series = pd.DataFrame({"Statistic": [statistic], "p-value": [pvalue]})
+[list(series)] + [None] + series.round(4).values.tolist()
+#+END_SRC
+
+#+RESULTS:
+| Statistic | p-value |
+|-----------+---------|
+| 1141.8983 |     0.0 |
+
+
+#+BEGIN_SRC python :session :var f="cum_friends.pdf" :results file graphics :exports results
+plt.style.use('ggplot')
+plt.clf()
+bins = np.linspace(0, 50_000, 25)
+plt.hist([control["friends_count"], sample["friends_count"]], bins, label=['control', 'sample'], cumulative=True)
+plt.legend(loc='upper left')
+plt.yscale('log', nonposy='clip')
+plt.savefig("../images/%s" % f)
+"images/%s" % f
+#+END_SRC
+
+#+ATTR_LATEX: :float multicolumn
+#+RESULTS:
+[[file:images/cum_friends.pdf]]
+
+#+BEGIN_SRC python :session :var f="vio_friends.pdf" :results file graphics :exports result
+plt.clf()
+ax = sns.violinplot(y="friends_count", x="sample", data=all_sampled)
+plt.yscale('log', nonposy='clip')
+plt.savefig("../images/%s" % f)
+"images/%s" % f
+#+END_SRC
+
+#+ATTR_LATEX: :float multicolumn
+#+RESULTS:
+[[file:images/vio_friends.pdf]]
+
+** Network Analysis
+* Discussion
+
+#+BEGIN_EXPORT latex
+\printbibliography
+#+END_EXPORT
+

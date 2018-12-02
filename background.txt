@@ -1,35 +1,11 @@
-\documentclass[manuscript, authordraft]{acmart}
-
-\begin{document}
-\title{Emoji and Identity}
-
-\author{Carl Colglazier}
-\affiliation{%
-  \institution{North Carolina State University}
-  \city{Raleigh}
-  \state{NC}
-  \country{USA}}
-\author{Zackary Allen}
-\affiliation{%
-  \institution{North Carolina State University}
-  \city{Raleigh}
-  \state{NC}
-  \country{USA}}
-\date{\today}
-\maketitle
-
-\begin{abstract}
-\end{abstract}
-
-\section{Introduction}
 Many Twitter users approach the platform as a means of presenting a
-formed identity to an imagined audience\cite{marwick2011tweet}. This
+formed identity to an imagined audience \cite{marwick2011tweet}. This
 activity often has the effect of flattening identity as individuals
-try to fit in to larger groups\cite{boyd2008taken}. At the same time,
+try to fit in to larger groups \cite{boyd2008taken}. At the same time,
 the amount of metadata associated with Twitter profiles is limited by
-design. Twitter has long used ``hovercards'' as a feature which shows
+design. Twitter has long used "hovercards" as a feature which shows
 a small set of information about a profile in the
-timeline\cite{twitterhover}. Thus when someone encounters an
+timeline \cite{twitterhover}. Thus when someone encounters an
 unfamiliar profile, they can quickly view that user’s display name,
 handle, short biography, profile picture, cover photo, number of
 followers, and accounts followed. By elevating these short pieces of
@@ -49,17 +25,17 @@ make judgements about these accounts on the basis of presented
 metadata rather than social association.
 
 Symbols often represent groups and can be political in
-nature. Following Benedict Anderson’s concept of ``imagined
-communities'' to describe the concept of
-nationalism\cite{anderson2006imagined}, for instance, we can think of
+nature. Following Benedict Anderson’s concept of "imagined
+communities" to describe the concept of
+nationalism \cite{anderson2006imagined}, for instance, we can think of
 national symbols such as flags or seals as materialized
 representations of group identity. Indeed, national flags make up a
-good part of the set of standardized emoji\cite{unicodeemoji}. These
+good part of the set of standardized emoji \cite{unicodeemoji}. These
 symbols–even within the context of an international, standardized
 system like emoji–can prove controversial. The Information and
 Communication Ministry of Indonesia, for instance, sought to remove
 emoji depicting same-sex couples in
-2016\cite{boellstorff2016against}. The standardization of emoji has
+\cite{boellstorff2016against}. The standardization of emoji has
 also raised concerns over the extent of their representation and
 diversity.
 
@@ -69,7 +45,7 @@ company itself, Twitter users have also embraced emoji characters and
 use them frequently. Emojitracker, a service which logs how Twitter
 accounts use emoji, has logged over a two billion instances of the
 most popular emoji on the list, the “Face with Tears of Joy”
-emoji\cite{emojitracker}. This emoji was declared the 2015 word of the
+emoji \cite{emojitracker}. This emoji was declared the 2015 word of the
 year by Oxford Dictionaries.
 
 Based on the hypothesis that many Twitter users include emoji in their
@@ -89,49 +65,3 @@ correctly can pull on the sense of identity that it brings to blend
 into the group. By taking advantage of the way emojis can create a
 sense of belonging, organizations could use information such as we are
 researching to strengthen their social media appearance.
-
-
-\section{Method}
-
-From online datasets, we have amassed a significant number of Twitter
-user-ids. With these ids, we can use the Twitter API to filter down to
-some hundreds of users that have emojis in their names or
-biographies. From there, we can gather information on some of their
-connections and filter them to find connections that also uses an
-emoji in their name or biography. The connection will be identified by
-type (following, retweeting, Tweet-quoting, responding, or @-ing).
-
-Once a dataset has been amassed of people with emojis we will carry
-out analysis on our hypothesis with both statistical and graph
-models. From our statistical models we hope to find that around 10\%
-of overall connections are with users with similar emojis (R1).
-
-As for the graph side, we expect users to form cliques with other
-users with similar emojis (R2). We also hypothesize that emojis in
-Twitter display names are used to signal belonging in sub-communities
-(R3). It furthermore presents a validation method for the theory based
-on analysis of the homogeneity of Twitter networks.
-
-\subsection{Research Questions}
-
-\begin{enumerate}
-\item R1: Do users with emojis connect more often with similar emoji users? (computational)
-\item R2: Do people tend to form cliques with similar emoji users? What does the overall network look like? (social)
-\item R3: Are some emoji more likely to appear in cliques than others? (computational)
-\end{enumerate}
-
-\subsection{Challenges}
-
-\begin{itemize}
-\item Data scraping and how much data is enough (10k users?) sparsity?
-  (computational)
-\item Connection representation (computational)
-\item Understanding Twitter cliques (social)
-\item R3 may change if there aren’t enough cliques
-\end{itemize}
-
-
-\bibliographystyle{abbrv}
-\bibliography{main}
-
-\end{document}
