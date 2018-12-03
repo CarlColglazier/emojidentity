@@ -365,17 +365,17 @@ print([["Emoji", "Total Count", "Sample Following", "Control Following"]] + [Non
 
 #+BEGIN_SRC python :session :exports results :results values table
 emoji_df = pd.DataFrame(0, index=emoji_list(), columns=emoji_list())
-s = original_sample[original_sample["id"].isin(sample["id"])]
-s["name_emoji"] = [get_emoji(str(x)) for x in s["name"]]
-c = original_control[original_control["id"].isin(control["id"])]
-for _, user in s[s.index < 10].iterrows():
+s = sample.merge(original_sample, on="id")
+for t, user in s[s.index < 100].iterrows():
+    if type(user["followers"]) != str:
+        continue
     followers = [int(x) for x in user["followers"].split(",")]
     count = Counter()
     for emoji in meta[meta["id"].isin(followers)]["nemoji"]:
-        for i, e in emoji:
+        for e in emoji:
             count[e] += 1
     for e in user["name_emoji"]:
-        for em, value in count:
+       for em, value in count.most_common():
             print(e, em, value)
             emoji_df[e][em] += value
 
@@ -383,7 +383,33 @@ emoji_df.sum().sum()
 #+END_SRC
 
 #+RESULTS:
-| 2 |
+| 4 |
+
+#+BEGIN_SRC python :session :results values
+edf = emoji_df.loc[emoji_df.sum() > 0, emoji_df.sum(axis=1) > 0]
+top = edf.sum(axis=1).sort_values(ascending=False).index[0:10]
+t = edf[edf.index.isin(top)][top].sort_index().sort_index(axis=1)
+t.columns.name = 'foo'
+vals = t.astype(str).values.tolist()
+for i in range(10):
+    vals[i].insert(0, t.index[i])
+
+_ = [[""] + list(t)] + [None] + vals
+#+END_SRC
+
+#+RESULTS:
+|    |  ✨ |   ❄️ |   ❌ | ❤️ |  ⭐ |   🇺🇸 |  🌊 | 🌹 | 👑 | 💜 |
+|----+-----+-----+------+---+-----+------+-----+----+----+----|
+| ✨ | 274 |  35 |   14 | 0 |   4 |   39 |   9 |  7 |  3 | 30 |
+| ❄️  |  18 |  96 |    4 | 0 |   0 |    4 |  94 |  2 |  3 |  4 |
+| ❌ |   3 |   1 |  969 | 0 | 331 | 2678 |   1 |  1 |  1 |  0 |
+| ❤️  |  95 |  31 |  101 | 0 |  44 |  281 |  29 |  9 |  9 | 14 |
+| ⭐ |   7 |   4 |  494 | 0 | 256 | 1377 |   3 |  0 |  3 |  4 |
+| 🇺🇸 |   5 | 245 | 1434 | 0 | 531 | 3572 | 246 |  2 | 10 |  2 |
+| 🌊 |  14 | 655 |    0 | 0 |   2 |   12 | 665 |  4 | 30 |  0 |
+| 🌹 |  32 |  14 |   36 | 0 |  15 |   91 |  15 | 78 |  1 |  4 |
+| 👑 | 109 |  12 |   18 | 0 |   1 |   19 |   8 |  2 | 14 |  4 |
+| 💜 |  16 |  76 |   16 | 0 |   4 |   33 |  17 |  2 |  2 |  5 |
 
 * Discussion
 Users in our sample with an emoji in their display names follow more
