@@ -1,11 +1,11 @@
 # -*- mode: org; org-export-babel-evaluate: nil -*-
 #+TITLE: Emoji and Group Identity on Twitter
 #+Author: Carl Colglazier, Zackary Allen
+#+OPTIONS: author:nil title:nil date:nil toc:nil
 #+LaTeX_CLASS: acmart
 #+LATEX_CLASS_OPTIONS: [format=manuscript, review=false, screen=true, authorversion=true, nonacm=true, authordraft=false]
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
-# #+LATEX_HEADER: \newunicodechar{✨}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2728.pdf}}}}
 #+LATEX_HEADER: \DeclareUnicodeCharacter{2728}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2728.pdf}}}}
 #+LATEX_HEADER: \DeclareUnicodeCharacter{1F1FA}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F1FA-1F1F8.pdf}}}}
 #+LATEX_HEADER: \DeclareUnicodeCharacter{1F451}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F451.pdf}}}}
@@ -18,84 +18,100 @@
 #+LATEX_HEADER: \DeclareUnicodeCharacter{1F49C}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F49C.pdf}}}}
 #+LATEX_HEADER: \DeclareUnicodeCharacter{2744}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2744.pdf}}}}
 #+LATEX_HEADER: \DeclareUnicodeCharacter{2B50}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2B50.pdf}}}}
-#+options: toc:nil
 #+PROPERTY: header-args :eval never-export
 #+LaTeX_HEADER: \usepackage{hyperref}
 # #+latex_header: \usepackage{coloremoji}
 # #+LaTeX_HEADER: \usepackage[margin=1in]{geometry}
 #+LaTeX_HEADER: \usepackage[backend=bibtex,sorting=none]{biblatex}
-#+LaTeX_HEADER: \addbibresource{main.bib}  %% point at your bib file
+#+LaTeX_HEADER: \addbibresource{main.bib}
 #+PANDOC_OPTIONS: bibliography:main.bib
 
-#+LaTeX: \begin{abstract}
+#+BEGIN_EXPORT latex
+\title[Twitter Emoji]{Emoji and Group Identity on Twitter}
+
+\author{Carl Colglazier}
+\affiliation{%
+  \institution{North Carolina State University}
+  \city{Raleigh}
+  \state{NC}
+  \postcode{27695}
+  \country{USA}}
+
+\author{Zackary Allen}
+\affiliation{%
+  \institution{North Carolina State University}
+  \city{Raleigh}
+  \state{NC}
+  \postcode{27695}
+  \country{USA}}}
+#+END_EXPORT
+
+#+BEGIN_abstract
 We propose a measure for group identity on Twitter using emoji
 displayed by users in their names or biographies. Viewing the use of
 emoji as social phenomenon, we introduce methods for measuring how
 often emoji users follow/friend other emoji users compared to
-non-emoji users. Furthermore, we introduce methods to measure how much
-users will friend/follow users with similar emojis, finally concluding
-with visual analysis of what ties between certain emoji look like.
-#+LaTeX: \end{abstract}
+non-emoji users. Furthermore, we introduce methods to measure quantify
+the frequency users friend/follow users with similar emojis,
+concluding with visual analysis of what ties between certain emoji
+look like.
+#+END_abstract
+
+#+LaTeX: \maketitle
 
 * Background
-
-#+BEGIN_COMMENT
-Many users use emojis, in large part because the limit for a display
-name is 50 characters, and the limit for a bio is 160 characters.
-#+END_COMMENT
 
 Many Twitter users engage with the platform to present a formed
 identity to an imagined audience \cite{marwick2011tweet}. This
 activity often flattens identity as individuals try to fit in to
-larger groups \cite{boyd2008taken}.
+larger groups \cite{boyd2008taken}.  At the same time, Twitter limits
+the metadata associated with each profile by design.
 
-At the same time, Twitter by design limits the extent of metadata
-associated with each profile. Twitter has long used "hovercards" which
-show a small set of information about a profile in the
-timeline \cite{twitterhover}. Thus when someone encounters an
-unfamiliar profile, they can quickly view that user’s display name,
-handle, short biography, profile picture, cover photo, and a count of
-the number of followers and accounts followed. By elevating these
-short pieces of metadata, Twitter creates an incentive for users to
-succinctly spotlight pieces of their identity to potential audience
-members through these attributes.
+Twitter has long used "hovercards" which show a small set of
+information about a profile in the timeline \cite{twitterhover}. Thus
+when someone encounters an unfamiliar profile, they can quickly view
+metadata including the user’s display name, handle, and a short
+biography.  By elevating these short pieces of metadata, Twitter
+creates an incentive for users to succinctly spotlight pieces of their
+identity to potential audience members through these attributes.  It
+is reasonable to assume many users use emoji here in large part
+because the limit for a display name is 50 characters and the limit
+for a bio is 160 characters.
 
-The main feature of Twitter is the ability to post and view
-Tweets---short messages limited to 280 characters. Tweets
-are typically intended for the followers of the poster, though they
-often get spread beyond just the user’s followers, thus encouraging a
-social community. Tweets can spread in a variety of ways: they can be
-retweeted directly, quote retweeted, or shown in another user’s feed
-when someone they follow likes the post. Each of these methods let a
-user see another user’s Tweet; this is applicable even if the former
-does not follow the latter. Thus Twitter users may be exposed to
-people outside of their immediate social circles and make judgements
-about these accounts on the basis of presented metadata rather than
-social association.
+Twitter's main feature is the ability to post and view Tweets---short
+messages limited to 280 characters. Tweets are typically intended for
+the author's followers, though they often get spread beyond just the
+user’s followers thereby encouraging a social community. Tweets can
+spread in a variety of ways: they can be retweeted directly, quote
+retweeted, or shown in another user’s feed when someone they follow
+likes the post. Each of these methods let a user see another user’s
+Tweet organically even without following them. Thus Twitter users may
+be exposed to people outside of their immediate social circles and
+make judgements about these accounts on the basis of presented
+metadata rather than social association.
 
 Symbols often represent groups and can be political in
 nature. Following Benedict Anderson’s concept of "imagined
-communities" to describe the concept of
-nationalism \cite{anderson2006imagined}, for instance, we can think of
-national symbols such as flags or seals as materialized
-representations of group identity. Indeed, national flags make up a
-good part of the set of standardized emoji \cite{unicodeemoji}. These
-symbols–even within the context of an international, standardized
-system like emoji–can prove controversial. The Information and
-Communication Ministry of Indonesia, for instance, sought to remove
-emoji depicting same-sex couples in
-\cite{boellstorff2016against}. The standardization of emoji has
-also raised concerns over the extent of their representation and
+communities" to describe the concept of nationalism
+\cite{anderson2006imagined}, for instance, we can think of national
+symbols such as flags or seals as materialized representations of
+group identity. Indeed, national flags make up a good part of the set
+of standardized emoji \cite{unicodeemoji}. These symbols–even within
+the context of an international, standardized system like emoji–can
+prove controversial. The Information and Communication Ministry of
+Indonesia, for instance, sought to remove emoji depicting same-sex
+couples \cite{boellstorff2016against}. The standardization of emoji
+has also raised concerns over the extent of their representation and
 diversity.
 
 Twitter has supported emoji on their platform since 2014. In fact,
-Twitter even developed an open-source emoji library. Beyond the
-company itself, Twitter users have also embraced emoji characters and
-use them frequently. Emojitracker, a service which logs how Twitter
-accounts use emoji, has logged over a two billion instances of the
-most popular emoji on the list, the “Face with Tears of Joy”
-emoji \cite{emojitracker}. This emoji was declared the 2015 word of the
-year by Oxford Dictionaries.
+Twitter even developed an open-source emoji library. The site's users
+have likewise embraced emoji characters and use them
+frequently. Emojitracker, a service which logs how Twitter accounts
+use emoji, has logged over a two billion instances of the most popular
+emoji on the list, the “Face with Tears of Joy” emoji
+\cite{emojitracker}. This emoji was declared the 2015 word of the year
+by Oxford Dictionaries.
 
 Based on the hypothesis that many Twitter users include emoji in their
 profile metadata as a signal for group identity, we predict that users
@@ -107,48 +123,37 @@ socialist movement, would more likely show homophilic behavior
 compared to more generic emoji such as the red heart emoji.
 
 Understanding the social intricacies of emoji use on Twitter can be
-valuable for marketing and public reputation. For organizations that
-use Twitter, emojis can be used to make their organization seem like
-the everyman. If done correctly, those that use these symbols
+valuable for marketing and public relations. For organizations that
+use Twitter, emojis can be used to make their organization seem more
+approachable. If done correctly, those that use these symbols
 correctly can pull on the sense of identity that it brings to blend
 into the group. By taking advantage of the way emojis can create a
-sense of belonging, organizations could use information such as we are
-researching to strengthen their social media appearance.
-
-
-* Method
-
-From the Twitter API, we have amassed a significant number of Twitter
-user-ids. With these ids, we have created two datasets: a control
-dataset of users without emojis in their screen names or biographies
-and a sample dataset of users with emojis in their screen names or
-biographies. From there, we have created a third dataset of secondary
-user information on their connections.
-
-Once our dataset was created, we carried out analysis on our
-hypothesis with both statistical and graph models. From our
-statistical models we found that users with emojis tend to connect
-with more users than users without emojis (R1). We found this by
-measuring the followers count, friends count, and listed count columns
-for each user in our first two datasets.  For the secondary user side,
-we found users form cliques with similar emoji users, which can be
-measured by counting emojis per secondary user and sorting by the
-total most popular emojis over the third dataset (R2). Unsurprisingly,
-this applies to both followers and friends of the primary user from
-the first two datasets.
-
-With our graph, the nodes are emojis and the edges are weighted by the
-number of connections between emoji. From our graph model we found
-that visually identifying strong ties between certain emojis is
-trivial (R3). It furthermore presents a validation method for the
-theory based on analysis of the homogeneity of Twitter networks.
-
+sense of belonging, organizations could strengthen the effectiveness
+of their social media appearance.
 ** Research Questions
-
-
 + R1: Do users with emojis make more connections?
 + R2: Do users tend to follow/friend more users with similar emoji?
 + R3: What does the overall emoji network look like?
+
+* Method
+From the Twitter API, we amassed a significant number of Twitter
+user-ids. With these ids, we created two datasets: a control
+dataset of users without emojis in their screen names or biographies
+and a sample dataset of users with emojis in their screen names or
+biographies. From there, we constructed a third dataset of secondary
+user information on their connections (accounts they follow and
+accounts that follow them).
+
+The sample and control accounts were originally sampled from a set of
+400,000. The secondary accounts were pulled for 2,500 users in the
+sample and 2,500 users in the control group. As some of the users
+in both groups had updated their metadata in the time since the
+set of 400,000 users was collected, a subset of 1,000 users from
+the sample and control were randomly chosen. Those in the sample
+group had an emoji in their name or biography the first time their
+profile was viewed and continued to use emoji at the time of the
+study. Those in the control group did not use emoji during either
+period of time.
 
 ** Challenges
 + How can we scrape useful amounts of data using only a free Twitter API key?
@@ -196,9 +201,9 @@ control = updated[(updated["name_emoji"].str.len() == 0) & (updated.index.isin(o
 control = control.sample(1000, random_state=31415926)
 #+END_SRC
 
-Before any analysis, we must first determine if parametric statistics
-apply. We can test for the normalcy of the distribution using
-D’Agostino and Pearson’s test for departure from normalcy.
+Before any analysis can occur, we must first determine if parametric
+statistics apply. We can test for the normalcy of the distribution
+using D’Agostino and Pearson’s test for departure from normalcy.
 
 #+BEGIN_SRC python :session :exports results :results values table
   t = {"sample": sample, "control": control}
@@ -262,7 +267,7 @@ greater than a randomly selected value from a second sample.
 | followers_count | 5.39E-23 |  373393.5 |
 | friends_count   | 7.99E-16 |  397093.0 |
 
-Table [[tbl:mann]] suggests a statistically significant different in the
+Table [[tbl:mann]] suggests a statistically significant difference in the
 distributions between the sample and control groups for the number of
 lists in which users appear, the number of accounts users follow, and
 the number of followers for each user.
@@ -282,11 +287,15 @@ plt.savefig("../images/%s" % f)
 #+END_SRC
 
 #+NAME: fig:vios
-#+CAPTION: Violin plot.
+#+CAPTION: Violin plot for the three variables in the sample analysis.
 #+RESULTS:
 [[file:images/vios.pdf]]
 
 Figure [[fig:vios]] shows the distribution of the ranks for the variables.
+Matching the results from [[tbl:mann]], the number of lists in which users
+appear is the least significant of the three variables. The number of
+followers and accounts followed (friends) have differences in
+distributions and rank means which are visually apparent.
 
 *** Old data. Not for export.                                      :noexport:
 
@@ -400,6 +409,11 @@ plt.savefig("../images/%s" % f)
 [[file:images/vio_friends.pdf]]
 
 ** Network Analysis
+The network analysis looks at the accounts that follow users in the
+sample and control group and the accounts that users in the sample and
+control group follow. The total size of this population was $N =
+4192099$.
+
 #+BEGIN_SRC python :session :exports results :results output table
 sample_follower_ids = set(chain.from_iterable([x.split(',') for x in list(sample.merge(original_sample, on="id", how='left')["followers"]) if type(x) == str]))
 control_follower_ids = set(chain.from_iterable([x.split(',') for x in list(control.merge(original_control, on="id", how='left')["followers"]) if type(x) == str]))
@@ -424,6 +438,8 @@ most_common = [x[0] for x in c.most_common(10)]
 print([["Emoji", "Total Count", "Sample Followers", "Control Followers"]] + [None] + [[x, c.get(x), csample.get(x), ccontrol.get(x)] for x in most_common])
 #+END_SRC
 
+#+NAME: tbl:emofollowers
+#+CAPTION: A comparison of the number of followers of users in the sample and control groups for the most-used emoji.
 #+RESULTS:
 | Emoji | Total Count | Sample Followers | Control Followers |
 |-------+-------------+------------------+-------------------|
@@ -462,6 +478,8 @@ most_common = [x[0] for x in c.most_common(10)]
 print([["Emoji", "Total Count", "Sample Following", "Control Following"]] + [None] + [[x, c.get(x), csample.get(x), ccontrol.get(x)] for x in most_common])
 #+END_SRC
 
+#+NAME: tbl:emofollowing
+#+CAPTION: A comparison of the number of accounts using emoji for the users followed by accounts in the sample and control groups for the most-used emoji.
 #+RESULTS:
 | Emoji | Total Count | Sample Following | Control Following |
 |-------+-------------+------------------+-------------------|
@@ -476,7 +494,12 @@ print([["Emoji", "Total Count", "Sample Following", "Control Following"]] + [Non
 | 🎄    |        7417 |             2314 |              1191 |
 | 💜    |        7371 |             1809 |               494 |
 
-#+BEGIN_SRC python :session :exports results :results values table
+Table [[tbl:emofollowers]] and Table [[tbl:emofollowing]] show that
+for each of the top ten most-used emoji, users in the sample
+group had more followers using each emoji in their profiles
+and followed more users using each emoji in their profiles.
+
+#+BEGIN_SRC python :session :exports none :results values table
 emoji_df = pd.DataFrame(0, index=emoji_list(), columns=emoji_list())
 s = sample.merge(original_sample, on="id")
 for t, user in s[s.index < 100].iterrows():
@@ -495,9 +518,6 @@ for t, user in s[s.index < 100].iterrows():
 emoji_df.sum().sum()
 #+END_SRC
 
-#+RESULTS:
-| 4 |
-
 #+BEGIN_SRC python :session :results values :exports results
 edf = emoji_df.loc[emoji_df.sum() > 0, emoji_df.sum(axis=1) > 0]
 top = edf.sum(axis=1).sort_values(ascending=False).index[0:10]
@@ -510,6 +530,8 @@ for i in range(10):
 _ = [[""] + list(t)] + [None] + vals
 #+END_SRC
 
+#+NAME: tbl:matrix
+#+CAPTION: Matrix representing the number of accounts with each emoji (columns) following accounts with other emoji (rows).
 #+RESULTS:
 |    |  ✨ |   ❄️ |   ❌ | ❤️ |  ⭐ |   🇺🇸 |  🌊 | 🌹 | 👑 | 💜 |
 |----+-----+-----+------+---+-----+------+-----+----+----+----|
@@ -524,18 +546,50 @@ _ = [[""] + list(t)] + [None] + vals
 | 👑 | 109 |  12 |   18 | 0 |   1 |   19 |   8 |  2 | 14 |  4 |
 | 💜 |  16 |  76 |   16 | 0 |   4 |   33 |  17 |  2 |  2 |  5 |
 
+Table [[tbl:matrix]] and Figure [[img:net]] demonstrate that for almost all
+of the most popular emoji, users were followed most commonly by
+profiles that shared the same emoji.
 
+#+NAME: img:net
+#+CAPTION: The network of emojis are weighted by count. As shown by thick cyclic lines, secondary users tend to follow users with similar emojis. Interestingly, some emojis like the red X and American flag have strong associations.
 [[file:images/graph.png]]
 
 * Discussion
-Users in our sample with an emoji in their display names follow more
-users, have more followers, and are included in more lists.
+We used our dataset to carry out analysis on our hypothesis with both
+statistical and graph models. From our statistical models we found
+that users who use emoji on their profiles tend to connect with more
+users than users without emojis (R1). We found this by measuring the
+followers count, friends count, and listed count columns for each user
+in our first two datasets.  For the secondary user side, we found
+users form cliques with similar emoji users, which can be measured by
+counting emojis per secondary user and sorting by the total most
+popular emojis over the third dataset (R2). Unsurprisingly, this
+applies to both followers and friends of the primary user from the
+first two datasets.
+
+With our graph in Figure [[img:net]], the nodes are emojis and the edges
+are weighted by the number of connections between emoji. From our
+graph model we found that visually identifying strong ties between
+certain emojis is trivial (R3). It furthermore presents a validation
+method for the theory based on analysis of the homogeneity of Twitter
+networks.
 ** Limitations
 The small sample size (N = 1000) limits the ability to compare
-attributes between users with different kinds of emoji.
-** Future Work
-We were unable to answer R3 given the sample size. To do so
-in the future.
+attributes between users with different kinds of emoji. Further
+study could reveal the differences between populations with
+specific emoji (say 🌹 verses 🌊), but the sample size we used
+was too small for each emoji to do this kind of analysis.
+
+The samples were not stratified by location, account age, activity
+levels, or popularity. Further study could reveal if the increased
+activity levels associated with emoji use might be better explained
+by other factors.
+
+Nonetheless, the results from R2 and R3 indicate that the use of
+emoji on Twitter profiles is influenced by group identity and
+indicate this could be a good area for further study.
+
+
 #+BEGIN_EXPORT latex
 \bibliographystyle{acm}
 \printbibliography
