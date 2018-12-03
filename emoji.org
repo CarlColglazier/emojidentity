@@ -44,11 +44,104 @@ Many users use emojis, in large part because the limit for a display
 name is 50 characters, and the limit for a bio is 160 characters.
 #+END_COMMENT
 
-#+INCLUDE: background.tex
+Many Twitter users engage with the platform to present a formed
+identity to an imagined audience \cite{marwick2011tweet}. This
+activity often flattens identity as individuals try to fit in to
+larger groups \cite{boyd2008taken}.
+
+At the same time, Twitter by design limits the extent of metadata
+associated with each profile. Twitter has long used "hovercards" which
+show a small set of information about a profile in the
+timeline \cite{twitterhover}. Thus when someone encounters an
+unfamiliar profile, they can quickly view that user’s display name,
+handle, short biography, profile picture, cover photo, and a count of
+the number of followers and accounts followed. By elevating these
+short pieces of metadata, Twitter creates an incentive for users to
+succinctly spotlight pieces of their identity to potential audience
+members through these attributes.
+
+The main feature of Twitter is the ability to post and view
+Tweets---short messages limited to 280 characters. Tweets
+are typically intended for the followers of the poster, though they
+often get spread beyond just the user’s followers, thus encouraging a
+social community. Tweets can spread in a variety of ways: they can be
+retweeted directly, quote retweeted, or shown in another user’s feed
+when someone they follow likes the post. Each of these methods let a
+user see another user’s Tweet; this is applicable even if the former
+does not follow the latter. Thus Twitter users may be exposed to
+people outside of their immediate social circles and make judgements
+about these accounts on the basis of presented metadata rather than
+social association.
+
+Symbols often represent groups and can be political in
+nature. Following Benedict Anderson’s concept of "imagined
+communities" to describe the concept of
+nationalism \cite{anderson2006imagined}, for instance, we can think of
+national symbols such as flags or seals as materialized
+representations of group identity. Indeed, national flags make up a
+good part of the set of standardized emoji \cite{unicodeemoji}. These
+symbols–even within the context of an international, standardized
+system like emoji–can prove controversial. The Information and
+Communication Ministry of Indonesia, for instance, sought to remove
+emoji depicting same-sex couples in
+\cite{boellstorff2016against}. The standardization of emoji has
+also raised concerns over the extent of their representation and
+diversity.
+
+Twitter has supported emoji on their platform since 2014. In fact,
+Twitter even developed an open-source emoji library. Beyond the
+company itself, Twitter users have also embraced emoji characters and
+use them frequently. Emojitracker, a service which logs how Twitter
+accounts use emoji, has logged over a two billion instances of the
+most popular emoji on the list, the “Face with Tears of Joy”
+emoji \cite{emojitracker}. This emoji was declared the 2015 word of the
+year by Oxford Dictionaries.
+
+Based on the hypothesis that many Twitter users include emoji in their
+profile metadata as a signal for group identity, we predict that users
+with certain emojis in their name or biography will connect at a
+higher rate with users that have similar emojis. We further expect
+some emoji to be associated with this behavior more than others. For
+instance, the rose emoji, which is used by members of the democratic
+socialist movement, would more likely show homophilic behavior
+compared to more generic emoji such as the red heart emoji.
+
+Understanding the social intricacies of emoji use on Twitter can be
+valuable for marketing and public reputation. For organizations that
+use Twitter, emojis can be used to make their organization seem like
+the everyman. If done correctly, those that use these symbols
+correctly can pull on the sense of identity that it brings to blend
+into the group. By taking advantage of the way emojis can create a
+sense of belonging, organizations could use information such as we are
+researching to strengthen their social media appearance.
+
 
 * Method
 
-#+INCLUDE: method.tex
+From the Twitter API, we have amassed a significant number of Twitter
+user-ids. With these ids, we have created two datasets: a control
+dataset of users without emojis in their screen names or biographies
+and a sample dataset of users with emojis in their screen names or
+biographies. From there, we have created a third dataset of secondary
+user information on their connections.
+
+Once our dataset was created, we carried out analysis on our
+hypothesis with both statistical and graph models. From our
+statistical models we found that users with emojis tend to connect
+with more users than users without emojis (R1). We found this by
+measuring the followers count, friends count, and listed count columns
+for each user in our first two datasets.  For the secondary user side,
+we found users form cliques with similar emoji users, which can be
+measured by counting emojis per secondary user and sorting by the
+total most popular emojis over the third dataset (R2). Unsurprisingly,
+this applies to both followers and friends of the primary user from
+the first two datasets.
+
+With our graph, the nodes are emojis and the edges are weighted by the
+number of connections between emoji. From our graph model we found
+that visually identifying strong ties between certain emojis is
+trivial (R3). It furthermore presents a validation method for the
+theory based on analysis of the homogeneity of Twitter networks.
 
 ** Research Questions
 
