@@ -2,12 +2,26 @@
 #+TITLE: Emoji and Group Identity on Twitter
 #+Author: Carl Colglazier, Zackary Allen
 #+LaTeX_CLASS: acmart
-#+LATEX_CLASS_OPTIONS: [format=manuscript, review=false, screen=true, authorversion=true, nonacm=true, authordraft=true]
+#+LATEX_CLASS_OPTIONS: [format=manuscript, review=false, screen=true, authorversion=true, nonacm=true, authordraft=false]
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
+# #+LATEX_HEADER: \newunicodechar{✨}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2728.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{2728}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2728.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{1F1FA}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F1FA-1F1F8.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{1F451}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F451.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{274C}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/274C.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{1F339}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F339.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{1F30A}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F30A.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{2764}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2764.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{1F33B}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F33B.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{1F384}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F384.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{1F49C}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/1F49C.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{2744}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2744.pdf}}}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{2B50}{\text{\raisebox{-0.2em}{\includegraphics[height=1em]{emoji/2B50.pdf}}}}
 #+options: toc:nil
+#+PROPERTY: header-args :eval never-export
 #+LaTeX_HEADER: \usepackage{hyperref}
-#+latex_header: \usepackage{coloremoji}
+# #+latex_header: \usepackage{coloremoji}
 # #+LaTeX_HEADER: \usepackage[margin=1in]{geometry}
 #+LaTeX_HEADER: \usepackage[backend=bibtex,sorting=none]{biblatex}
 #+LaTeX_HEADER: \addbibresource{main.bib}  %% point at your bib file
@@ -15,11 +29,20 @@
 
 #+LaTeX: \begin{abstract}
 We propose a measure for group identity on Twitter using emoji
-displayed by users in their names. Viewing the use of emoji
-as social phenomenon, we introduce methods for measuring...
+displayed by users in their names or biographies. Viewing the use of
+emoji as social phenomenon, we introduce methods for measuring how
+often emoji users follow/friend other emoji users compared to
+non-emoji users. Furthermore, we introduce methods to measure how much
+users will friend/follow users with similar emojis, finally concluding
+with visual analysis of what ties between certain emoji look like.
 #+LaTeX: \end{abstract}
 
 * Background
+
+#+BEGIN_COMMENT
+Many users use emojis, in large part because the limit for a display
+name is 50 characters, and the limit for a bio is 160 characters.
+#+END_COMMENT
 
 #+INCLUDE: background.tex
 
@@ -30,17 +53,14 @@ as social phenomenon, we introduce methods for measuring...
 ** Research Questions
 
 
-+ R1: Do users with emojis connect more often with other emoji users? (computational)
-+ R2: Do people tend to form cliques with similar emoji users? What does the overall network look like? (social)
-+ R3: Are some emoji more likely to appear in cliques than others? (computational)
++ R1: Do users with emojis make more connections?
++ R2: Do users tend to follow/friend more users with similar emoji?
++ R3: What does the overall emoji network look like?
 
 ** Challenges
-+  Data scraping and how much data is enough (10k users?) sparsity?
-  (computational)
-+ Connection representation (computational)
-+ Understanding Twitter cliques (social)
-+ R3 may change if there aren’t enough cliques
-
++ How can we scrape useful amounts of data using only a free Twitter API key?
++ How can we simultaneously draw conclusions about users and emojis?
++ How can we graph a network of secondary users and their emojis?
 * Results
 ** Sample Analysis
 #+BEGIN_SRC python :dir ./scripts :session :exports none :results silent
@@ -328,7 +348,7 @@ print([["Emoji", "Total Count", "Sample Followers", "Control Followers"]] + [Non
 #+BEGIN_SRC python :session :exports results :results output table
 sample_following_ids = set(chain.from_iterable([x.split(',') for x in list(sample.merge(original_sample, on="id", how='left')["following"]) if type(x) == str]))
 control_following_ids = set(chain.from_iterable([x.split(',') for x in list(control.merge(original_control, on="id", how='left')["following"]) if type(x) == str]))
-meta["sample_following"] = meta["id"].isin(control_following_ids)
+meta["sample_following"] = meta["id"].isin(sample_following_ids)
 meta["control_following"] = meta["id"].isin(control_following_ids)
 c = Counter()
 csample = Counter()
@@ -350,18 +370,18 @@ print([["Emoji", "Total Count", "Sample Following", "Control Following"]] + [Non
 #+END_SRC
 
 #+RESULTS:
-| Emoji | Total Count | Sample Friends | Control Friends |
-|-------+-------------+----------------+-----------------|
-| ✨    |       26895 |           2386 |            2386 |
-| 🇺🇸    |       24072 |           8883 |            8883 |
-| 👑    |       12985 |           1126 |            1126 |
-| ❌    |       11830 |           4784 |            4784 |
-| 🌹    |       11396 |           1582 |            1582 |
-| 🌊    |       10740 |           4876 |            4876 |
-| ❤️     |        9584 |           1268 |            1268 |
-| 🌻    |        7643 |            892 |             892 |
-| 🎄    |        7417 |           1191 |            1191 |
-| 💜    |        7371 |            494 |             494 |
+| Emoji | Total Count | Sample Following | Control Following |
+|-------+-------------+------------------+-------------------|
+| ✨    |       26895 |             7153 |              2386 |
+| 🇺🇸    |       24072 |            15776 |              8883 |
+| 👑    |       12985 |             3199 |              1126 |
+| ❌    |       11830 |             8660 |              4784 |
+| 🌹    |       11396 |             3329 |              1582 |
+| 🌊    |       10740 |             6791 |              4876 |
+| ❤️     |        9584 |             2882 |              1268 |
+| 🌻    |        7643 |             2075 |               892 |
+| 🎄    |        7417 |             2314 |              1191 |
+| 💜    |        7371 |             1809 |               494 |
 
 #+BEGIN_SRC python :session :exports results :results values table
 emoji_df = pd.DataFrame(0, index=emoji_list(), columns=emoji_list())
@@ -385,7 +405,7 @@ emoji_df.sum().sum()
 #+RESULTS:
 | 4 |
 
-#+BEGIN_SRC python :session :results values
+#+BEGIN_SRC python :session :results values :exports results
 edf = emoji_df.loc[emoji_df.sum() > 0, emoji_df.sum(axis=1) > 0]
 top = edf.sum(axis=1).sort_values(ascending=False).index[0:10]
 t = edf[edf.index.isin(top)][top].sort_index().sort_index(axis=1)
@@ -410,6 +430,9 @@ _ = [[""] + list(t)] + [None] + vals
 | 🌹 |  32 |  14 |   36 | 0 |  15 |   91 |  15 | 78 |  1 |  4 |
 | 👑 | 109 |  12 |   18 | 0 |   1 |   19 |   8 |  2 | 14 |  4 |
 | 💜 |  16 |  76 |   16 | 0 |   4 |   33 |  17 |  2 |  2 |  5 |
+
+
+[[file:images/graph.png]]
 
 * Discussion
 Users in our sample with an emoji in their display names follow more
